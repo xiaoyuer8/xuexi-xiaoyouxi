@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; media-src 'self' https:; font-src 'self' data: https:;">
+<title>学习小游戏</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M60 14 L72.34 49.01 L109.45 49.93 L79.97 72.49 L90.56 108.07 L60 87 L29.44 108.07 L40.03 72.49 L10.55 49.93 L47.66 49.01 Z' fill='%23FFC53D' stroke='%23F59E0B' stroke-width='4' stroke-linejoin='round'/%3E%3Ccircle cx='48' cy='58' r='5' fill='%234A3B2A'/%3E%3Ccircle cx='72' cy='58' r='5' fill='%234A3B2A'/%3E%3Cpath d='M48 72 Q60 84 72 72' stroke='%234A3B2A' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+/* ================= 基础与主题 ================= */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#4A3B2A; --sub:#9A8A74; --card:#FFFFFF;
+  --yellow:#FFC53D; --yellow-d:#F59E0B;
+  --orange:#FF8F3C; --orange-d:#E07B24;
+  --pink:#FF7BA9; --pink-d:#E85D8F;
+  --teal:#3EC6B8; --teal-d:#2BA396;
+  --blue:#5B9DF0; --blue-d:#3F7FD6;
+  --green:#55C47A; --green-d:#3AA55F;
+  --purple:#A78BFA; --purple-d:#8B6FE0;
+  --shadow:0 8px 20px rgba(74,59,42,.08);
+  --press:0 6px 0 rgba(74,59,42,.16);
+}
+html,body{height:100%}
+body{
+  font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC","Source Han Sans SC",system-ui,sans-serif;
+  color:var(--ink);
+  background:linear-gradient(180deg,#E3F3FF 0%,#FFF8E8 52%,#FFEFD2 100%) fixed;
+  -webkit-user-select:none;user-select:none;
+  overflow-x:hidden;
+}
+#app{max-width:820px;margin:0 auto;min-height:100%;padding:10px 16px 96px;position:relative}
+
+/* ================= 通用组件 ================= */
+.hidden{display:none!important}
+.view{display:none}
+.view.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:center;gap:12px;margin:6px 0 4px}
+.page-head h1{font-size:26px;font-weight:800;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.page-sub{font-size:17px;color:var(--sub);margin:2px 0 14px}
+.back-btn{
+  width:44px;height:44px;flex:none;border:none;border-radius:14px;font-size:26px;font-weight:800;color:#fff;
+  background:linear-gradient(180deg,#7FB8F5,var(--blue));box-shadow:var(--press);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.back-btn:active{transform:translateY(4px);box-shadow:none}
+.head-date,.head-progress{font-size:15px;font-weight:700;color:var(--sub);white-space:nowrap}
+
+/* 大按钮 */
+.big-btn{
+  display:block;width:100%;border:none;border-radius:20px;padding:18px;font-size:24px;font-weight:800;
+  color:#fff;cursor:pointer;box-shadow:var(--press);letter-spacing:2px;transition:transform .06s;
+}
+.big-btn:active{transform:translateY(5px);box-shadow:none}
+.big-btn.yellow{background:linear-gradient(180deg,#FFD666,var(--yellow-d))}
+.big-btn.orange{background:linear-gradient(180deg,#FFA75C,var(--orange-d))}
+.big-btn.green{background:linear-gradient(180deg,#6FD98F,var(--green-d))}
+.big-btn.blue{background:linear-gradient(180deg,#7FB8F5,var(--blue-d))}
+.big-btn.teal{background:linear-gradient(180deg,#5FD8CC,var(--teal-d))}
+.big-btn.pink{background:linear-gradient(180deg,#FF9DBD,var(--pink-d))}
+.big-btn.gray{background:linear-gradient(180deg,#C9BFAF,#A99B87)}
+.big-btn.smaller{font-size:20px;padding:15px;border-radius:16px}
+
+/* 图标按钮 */
+.icon-btn{
+  width:44px;height:44px;flex:none;border:none;border-radius:50%;background:#fff;cursor:pointer;
+  box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;color:var(--sub);
+}
+.icon-btn:active{transform:scale(.92)}
+
+/* ================= 首页 ================= */
+.home-top{display:flex;align-items:center;gap:12px;margin:8px 0 14px}
+.mascot{width:76px;height:76px;flex:none;filter:drop-shadow(0 6px 8px rgba(245,158,11,.35))}
+.greet{flex:1}
+.greet-hi{font-size:26px;font-weight:800;line-height:1.3}
+.greet-date{font-size:14px;color:var(--sub);margin-top:2px}
+
+.stats-card{
+  background:var(--card);border-radius:24px;box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:space-around;padding:18px 8px;margin-bottom:14px;
+}
+.stat{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.stat svg{width:34px;height:34px;margin-bottom:4px}
+.stat-num{font-size:30px;font-weight:800;line-height:1;white-space:nowrap}
+.stat-num.small{font-size:22px}
+.stat-label{font-size:14px;color:var(--sub);white-space:nowrap}
+.stat-div{width:2px;height:44px;background:#F2E7D3;border-radius:2px}
+
+.bubble-row{display:flex;justify-content:center;margin:2px 0 16px}
+.bubble{
+  background:#fff;border:3px dashed #FFD98A;border-radius:22px;padding:12px 22px;
+  font-size:19px;font-weight:700;text-align:center;max-width:100%;
+  box-shadow:var(--shadow);position:relative;
+}
+.bubble::before{
+  content:"";position:absolute;left:22px;top:-12px;border:8px solid transparent;border-bottom-color:#FFD98A;
+}
+.bubble::after{
+  content:"";position:absolute;left:26px;top:-6px;border:6px solid transparent;border-bottom-color:#fff;
+}
+
+.feature-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:4px}
+.feat{
+  border:none;border-radius:24px;padding:20px 22px;color:#fff;cursor:pointer;text-align:left;
+  box-shadow:var(--press);display:flex;align-items:center;gap:16px;transition:transform .06s;
+}
+.feat:active{transform:translateY(5px);box-shadow:none}
+.feat svg{width:52px;height:52px;flex:none}
+.feat .feat-t{font-size:25px;font-weight:800;display:block}
+.feat small{font-size:15px;opacity:.95;display:block;margin-top:2px}
+.feat-hw{background:linear-gradient(135deg,#FFB35C,#FF8F3C)}
+.feat-quiz{background:linear-gradient(135deg,#7FB8F5,#5B9DF0)}
+.feat-pv{background:linear-gradient(135deg,#8FE0D4,#3EC6B8)}
+
+/* ================= 打卡 ================= */
+.hw-list{display:grid;grid-template-columns:1fr;gap:12px;margin:6px 0 16px}
+.hw-item{
+  background:var(--card);border-radius:20px;box-shadow:var(--shadow);cursor:pointer;
+  display:flex;align-items:center;gap:14px;padding:14px 16px;border:4px solid transparent;transition:border-color .15s;
+}
+.hw-item .hw-ico{
+  width:54px;height:54px;flex:none;border-radius:18px;display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.hw-item .hw-ico svg{width:30px;height:30px}
+.hw-item .hw-name{font-size:22px;font-weight:800;flex:1}
+.hw-item .hw-st{font-size:14px;color:var(--sub)}
+.hw-check{
+  width:38px;height:38px;flex:none;border-radius:50%;border:4px solid #E5D9C4;display:flex;
+  align-items:center;justify-content:center;color:#fff;font-size:22px;font-weight:900;transition:all .15s;
+}
+.hw-item.checked{border-color:#BFEFCC;background:#F1FCF4}
+.hw-item.checked .hw-check{background:var(--green);border-color:var(--green)}
+.hw-foot{margin-top:8px}
+.hw-tip{text-align:center;font-size:17px;color:var(--sub);margin-bottom:10px}
+.hw-tip b{color:var(--orange-d);font-size:22px}
+
+/* ================= 科目选择 ================= */
+.subj-grid{display:grid;grid-template-columns:1fr;gap:14px}
+.subj-card{
+  border:none;border-radius:24px;padding:24px;color:#fff;cursor:pointer;box-shadow:var(--press);
+  display:flex;align-items:center;gap:18px;text-align:left;transition:transform .06s;
+}
+.subj-card:active{transform:translateY(5px);box-shadow:none}
+.subj-card svg{width:56px;height:56px;flex:none}
+.subj-card .sj-t{font-size:26px;font-weight:800;display:block}
+.subj-card small{font-size:15px;opacity:.95;display:block;margin-top:3px}
+.sj-cn{background:linear-gradient(135deg,#FFB35C,#FF8F3C)}
+.sj-ma{background:linear-gradient(135deg,#7FB8F5,#5B9DF0)}
+.sj-en{background:linear-gradient(135deg,#FF9DBD,#FF7BA9)}
+
+/* ================= 练习 ================= */
+.progress{height:16px;background:#F0E6D2;border-radius:10px;margin:8px 0 16px;overflow:hidden}
+.progress-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#FFD666,#FF8F3C);transition:width .3s}
+.q-card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:22px 18px;margin-bottom:16px}
+.q-text{font-size:24px;font-weight:800;line-height:1.6;margin-bottom:18px;min-height:74px}
+.opts{display:grid;grid-template-columns:1fr;gap:12px}
+.opt{
+  border:4px solid #F0E6D2;background:#FFFDF7;border-radius:18px;padding:15px 16px;font-size:21px;font-weight:700;
+  cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;transition:all .15s;
+}
+.opt .opt-tag{
+  width:34px;height:34px;flex:none;border-radius:12px;background:#F7EEDC;color:var(--sub);
+  display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;
+}
+.opt:active{transform:scale(.98)}
+.opt.correct{border-color:var(--green);background:#EFFAF2}
+.opt.correct .opt-tag{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--pink-d);background:#FEF0F4}
+.opt.wrong .opt-tag{background:var(--pink-d);color:#fff}
+.opt.disabled{cursor:default;opacity:.75}
+.q-feedback{margin-top:16px;padding:13px 16px;border-radius:16px;font-size:19px;font-weight:800;text-align:center}
+.q-feedback.ok{background:#EFFAF2;color:var(--green-d)}
+.q-feedback.no{background:#FEF0F4;color:var(--pink-d)}
+#qNext{margin-top:4px}
+
+.result-card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);text-align:center;padding:30px 18px;margin:10px 0 18px}
+.result-stars{font-size:0;margin-bottom:14px}
+.result-stars svg{width:44px;height:44px;margin:0 4px}
+.result-score{font-size:44px;font-weight:800;color:var(--orange-d)}
+.result-msg{font-size:20px;font-weight:700;margin-top:8px}
+.result-btns{display:grid;grid-template-columns:1fr;gap:12px}
+.answer-detail{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-top:16px;padding:16px 18px}
+.answer-detail summary{font-size:19px;font-weight:800;cursor:pointer;color:var(--blue-d)}
+.ans-item{padding:10px 0;border-bottom:1px dashed #F0E6D2;font-size:16px;line-height:1.6}
+.ans-item:last-child{border-bottom:none}
+.ans-item .q{font-weight:700}
+.ans-item .r{color:var(--green-d);font-weight:700}
+.ans-item .w{color:var(--pink-d);font-weight:700}
+
+/* ================= 预习 ================= */
+.kn-card{background:var(--card);border-radius:20px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+.kn-head{display:flex;align-items:center;gap:12px;padding:16px;cursor:pointer}
+.kn-num{
+  width:40px;height:40px;flex:none;border-radius:14px;background:#FFF3D6;color:var(--orange-d);
+  display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;
+}
+.kn-title{flex:1;font-size:20px;font-weight:800}
+.kn-arrow{flex:none;font-size:22px;color:var(--sub);transition:transform .2s;font-weight:800}
+.kn-card.open .kn-arrow{transform:rotate(90deg)}
+.kn-body{display:none;padding:0 18px 16px 70px;font-size:18px;line-height:1.8;color:#5D4F3C}
+.kn-card.open .kn-body{display:block;animation:fadeIn .2s ease}
+.kn-body b{color:var(--teal-d)}
+.pv-foot{margin-top:8px}
+.pv-tip{text-align:center;font-size:17px;color:var(--sub);margin-bottom:10px}
+
+/* ================= 历史 ================= */
+.hist-tabs{display:flex;gap:10px;margin:4px 0 12px;flex-wrap:wrap}
+.hist-tabs button{
+  border:none;border-radius:14px;padding:10px 20px;font-size:17px;font-weight:700;cursor:pointer;
+  background:#fff;color:var(--sub);box-shadow:var(--shadow);
+}
+.hist-tabs button.active{background:linear-gradient(180deg,#FFD666,var(--yellow-d));color:#fff}
+.hist-sum{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;font-size:16px;color:var(--sub);margin-bottom:12px;line-height:1.7}
+.hist-sum b{color:var(--orange-d);font-size:19px}
+.hist-item{
+  background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:13px 16px;margin-bottom:10px;
+  display:flex;align-items:center;gap:12px;
+}
+.hist-ico{width:42px;height:42px;flex:none;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff}
+.hist-ico svg{width:24px;height:24px}
+.hist-main{flex:1;min-width:0}
+.hist-title{font-size:17px;font-weight:800}
+.hist-date{font-size:13px;color:var(--sub);margin-top:2px}
+.hist-badge{flex:none;font-size:16px;font-weight:800;color:var(--orange-d);white-space:nowrap}
+.hist-empty{text-align:center;padding:40px 0;color:var(--sub)}
+.hist-empty svg{width:90px;height:90px;opacity:.6;margin-bottom:10px}
+.hist-empty p{font-size:17px}
+
+/* ================= 底部导航 ================= */
+#tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;background:#fff;
+  display:flex;justify-content:space-around;align-items:stretch;
+  box-shadow:0 -4px 18px rgba(74,59,42,.08);padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+#tabbar .tab{
+  flex:1;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:6px 0;color:#B4A894;font-size:14px;font-weight:700;border-radius:12px;
+}
+#tabbar .tab svg{width:26px;height:26px}
+#tabbar .tab.active{color:var(--orange-d)}
+#tabbar .tab:active{transform:scale(.92)}
+
+/* ================= 弹层 ================= */
+#toast{
+  position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);z-index:90;
+  background:rgba(74,59,42,.92);color:#fff;font-size:17px;font-weight:700;border-radius:16px;
+  padding:12px 22px;opacity:0;pointer-events:none;transition:all .25s;max-width:86vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#star-pop{
+  position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;
+  background:rgba(255,246,224,.5);
+}
+#star-pop.show{display:flex}
+.star-pop-box{text-align:center;animation:popIn .4s cubic-bezier(.34,1.56,.64,1)}
+.star-pop-box .sp-star{width:120px;height:120px;margin:0 auto;animation:spinIn .5s ease}
+.star-pop-box .sp-num{font-size:52px;font-weight:800;color:var(--orange-d);margin-top:8px}
+.star-pop-box .sp-msg{font-size:22px;font-weight:800;margin-top:6px}
+.star-pop-box .sp-sub{font-size:15px;color:var(--sub);margin-top:4px}
+.star-pop-box button{margin-top:18px;max-width:220px;margin-left:auto;margin-right:auto}
+@keyframes popIn{0%{transform:scale(.3);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes spinIn{0%{transform:scale(0) rotate(-180deg)}100%{transform:scale(1) rotate(0)}}
+.confetti{
+  position:fixed;top:-20px;z-index:95;pointer-events:none;border-radius:3px;
+  animation:confFall linear forwards;
+}
+@keyframes confFall{to{transform:translateY(110vh) rotate(720deg);opacity:.9}}
+
+@media (prefers-reduced-motion:reduce){
+  .confetti,.star-pop-box,.mascot,#toast,.view{animation:none!important;transition:none!important}
+}
+
+/* ================= 平板适配 ================= */
+@media (min-width:600px){
+  .feature-grid{grid-template-columns:repeat(3,1fr)}
+  .hw-list{grid-template-columns:repeat(2,1fr)}
+  .subj-grid{grid-template-columns:repeat(3,1fr)}
+  .opts{grid-template-columns:repeat(2,1fr)}
+  .result-btns{grid-template-columns:repeat(3,1fr)}
+  .page-head h1{font-size:30px}
+  .q-text{font-size:27px}
+  #app{padding-top:18px}
+}
+@media (min-width:1000px){
+  #app{padding-left:28px;padding-right:28px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= 视图：首页 ================= -->
+  <section class="view active" id="v-home">
+    <div class="home-top">
+      <svg class="mascot" viewBox="0 0 120 120" aria-hidden="true">
+        <path d="M60 14 L72.34 49.01 L109.45 49.93 L79.97 72.49 L90.56 108.07 L60 87 L29.44 108.07 L40.03 72.49 L10.55 49.93 L47.66 49.01 Z" fill="#FFC53D" stroke="#F59E0B" stroke-width="4" stroke-linejoin="round"/>
+        <circle cx="48" cy="56" r="5.5" fill="#4A3B2A"/>
+        <circle cx="72" cy="56" r="5.5" fill="#4A3B2A"/>
+        <circle cx="47" cy="55" r="1.8" fill="#fff"/>
+        <circle cx="71" cy="55" r="1.8" fill="#fff"/>
+        <path d="M48 70 Q60 82 72 70" stroke="#4A3B2A" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="38" cy="66" r="6" fill="#FF9DBD" opacity=".7"/>
+        <circle cx="82" cy="66" r="6" fill="#FF9DBD" opacity=".7"/>
+        <path d="M60 8 L64 16 L56 16 Z" fill="#FFF3D6"/>
+      </svg>
+      <div class="greet">
+        <div class="greet-hi" id="greetHi">你好呀！</div>
+        <div class="greet-date" id="greetDate"></div>
+      </div>
+      <button class="icon-btn" id="soundBtn" title="声音开关">
+        <svg id="soundIcon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+      </button>
+    </div>
+
+    <div class="stats-card">
+      <div class="stat">
+        <svg viewBox="0 0 24 24" fill="#FFC53D" stroke="#F59E0B" stroke-width="1"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"/></svg>
+        <div class="stat-num" id="statStars">0</div>
+        <div class="stat-label">我的星星</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <svg viewBox="0 0 24 24" fill="#FF8F3C"><path d="M12 2c1 4-4 6-4 10a4 4 0 0 0 8 0c0-1-.3-2-.8-3-.4 1-.9 1.6-1.7 2.1.2-2.4-1-4.5-1.5-9.1z"/><path d="M12 22a4 4 0 0 0 4-4H8a4 4 0 0 0 4 4z" opacity=".85"/></svg>
+        <div class="stat-num small" id="statStreak">0</div>
+        <div class="stat-label">连续打卡（天）</div>
+      </div>
+      <div class="stat-div"></div>
+      <div class="stat">
+        <svg viewBox="0 0 24 24" fill="#55C47A"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
+        <div class="stat-num small" id="statToday">未打卡</div>
+        <div class="stat-label">今天打卡</div>
+      </div>
+    </div>
+
+    <div class="bubble-row"><div class="bubble" id="encourage">今天也要加油哦！</div></div>
+
+    <div class="feature-grid">
+      <button class="feat feat-hw" data-goto="hw">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14l7 7L32 6"/><path d="M8 30l7 7 12-12"/><rect x="30" y="22" width="12" height="20" rx="3"/></svg>
+        <span><span class="feat-t">作业打卡</span><small>完成作业得星星</small></span>
+      </button>
+      <button class="feat feat-quiz" data-goto="quiz">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6h24v36l-8-6-8 6-8-6z" transform="translate(0 0)"/><path d="M18 18h12M18 25h12" transform="translate(0 0)"/></svg>
+        <span><span class="feat-t">复习练习</span><small>随机10题闯关</small></span>
+      </button>
+      <button class="feat feat-pv" data-goto="pv">
+        <svg viewBox="0 0 48 48" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4c-5 8-12 12-12 20a12 12 0 0 0 24 0c0-8-7-12-12-20z"/><path d="M18 28a6 6 0 0 0 6 6"/></svg>
+        <span><span class="feat-t">预习新知识</span><small>学完得星星</small></span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ================= 视图：作业打卡 ================= -->
+  <section class="view" id="v-hw">
+    <header class="page-head">
+      <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+      <h1>作业打卡</h1>
+      <span class="head-date" id="hwDate"></span>
+    </header>
+    <p class="page-sub">勾选今天完成的作业吧！</p>
+    <div class="hw-list" id="hwList"></div>
+    <div class="hw-foot">
+      <div class="hw-tip" id="hwTip"></div>
+      <button class="big-btn green" id="hwDone">完成打卡</button>
+    </div>
+  </section>
+
+  <!-- ================= 视图：复习练习 ================= -->
+  <section class="view" id="v-quiz">
+    <div id="quiz-select">
+      <header class="page-head">
+        <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+        <h1>复习练习</h1>
+      </header>
+      <p class="page-sub">选一个科目，开始闯关！</p>
+      <div class="subj-grid" id="quizSubjGrid"></div>
+    </div>
+    <div id="quiz-play" hidden>
+      <header class="page-head">
+        <button class="back-btn" id="quizQuit" aria-label="退出练习">‹</button>
+        <h1><span id="quizSubjName"></span>练习</h1>
+        <span class="head-progress" id="quizCount">1/10</span>
+      </header>
+      <div class="progress"><div class="progress-fill" id="quizBar"></div></div>
+      <div class="q-card">
+        <div class="q-text" id="qText"></div>
+        <div class="opts" id="qOpts"></div>
+        <div class="q-feedback hidden" id="qFeedback"></div>
+      </div>
+      <button class="big-btn blue smaller hidden" id="qNext">下一题</button>
+    </div>
+    <div id="quiz-result" hidden>
+      <header class="page-head"><h1>成绩单</h1></header>
+      <div class="result-card">
+        <div class="result-stars" id="resultStars"></div>
+        <div class="result-score" id="resultScore"></div>
+        <div class="result-msg" id="resultMsg"></div>
+      </div>
+      <div class="result-btns">
+        <button class="big-btn orange smaller" id="quizAgain">再来一组</button>
+        <button class="big-btn teal smaller" id="quizOther">换科目</button>
+        <button class="big-btn gray smaller" id="quizHome">回首页</button>
+      </div>
+      <details class="answer-detail"><summary>查看题目和答案</summary><div id="answerList"></div></details>
+    </div>
+  </section>
+
+  <!-- ================= 视图：预习新知识 ================= -->
+  <section class="view" id="v-pv">
+    <div id="pv-select">
+      <header class="page-head">
+        <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+        <h1>预习新知识</h1>
+      </header>
+      <p class="page-sub">选一个科目，提前学一学！</p>
+      <div class="subj-grid" id="pvSubjGrid"></div>
+    </div>
+    <div id="pv-list" hidden>
+      <header class="page-head">
+        <button class="back-btn" id="pvBack" aria-label="返回">‹</button>
+        <h1><span id="pvSubjName"></span> · 三年级上册</h1>
+      </header>
+      <div id="pvCards"></div>
+      <div class="pv-foot">
+        <div class="pv-tip" id="pvTip"></div>
+        <button class="big-btn yellow" id="pvDone">预习完成</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 视图：历史记录 ================= -->
+  <section class="view" id="v-history">
+    <header class="page-head">
+      <button class="back-btn" data-goto="home" aria-label="返回">‹</button>
+      <h1>历史记录</h1>
+    </header>
+    <div class="hist-tabs" id="histTabs"></div>
+    <div class="hist-sum" id="histSum"></div>
+    <div class="hist-list" id="histList"></div>
+  </section>
+
+  <!-- ================= 底部导航 ================= -->
+  <nav id="tabbar">
+    <button class="tab active" data-goto="home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
+      <span>首页</span>
+    </button>
+    <button class="tab" data-goto="hw">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4 4L16 4"/><path d="M4 16l4 4 7-7"/><rect x="15" y="13" width="6" height="10" rx="1.5"/></svg>
+      <span>打卡</span>
+    </button>
+    <button class="tab" data-goto="quiz">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-4.5-3.4L9 21V3z"/><path d="M9.5 10h5M9.5 14h3"/></svg>
+      <span>练习</span>
+    </button>
+    <button class="tab" data-goto="pv">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2.5 4-6 6-6 10a6 6 0 0 0 12 0c0-4-3.5-6-6-10z"/><path d="M9 15.5a3 3 0 0 0 3 3"/></svg>
+      <span>预习</span>
+    </button>
+    <button class="tab" data-goto="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+      <span>记录</span>
+    </button>
+  </nav>
+
+  <div id="toast"></div>
+  <div id="star-pop"></div>
+</div>
+
+<script>
+'use strict';
+/* ================================================================
+   学习小游戏 · 三年级上册（离线版）
+   数据全部保存在本地，关闭后不丢失；无需联网、无需登录。
+   ================================================================ */
+
+/* ---------------- 常量与元信息 ---------------- */
+var KEY='xxq_game_v1';
+var HW_SUBJECTS=['语文','数学','英语','阅读','练字'];
+var Q_SUBJECTS=['语文','数学','英语'];
+var HW_META={
+  '语文':{cls:'hw-cn',color:'#FF8F3C',desc:'课本生字、词语'},
+  '数学':{cls:'hw-ma',color:'#5B9DF0',desc:'口算、练习册'},
+  '英语':{cls:'hw-en',color:'#FF7BA9',desc:'单词、课文跟读'},
+  '阅读':{cls:'hw-rd',color:'#A78BFA',desc:'读课外书15分钟'},
+  '练字':{cls:'hw-pw',color:'#3EC6B8',desc:'把字写工整'}
+};
+var Q_META={
+  '语文':{cls:'sj-cn',color:'#FF8F3C',desc:'认字 · 古诗 · 词句'},
+  '数学':{cls:'sj-ma',color:'#5B9DF0',desc:'口算 · 单位 · 图形'},
+  '英语':{cls:'sj-en',color:'#FF7BA9',desc:'单词 · 句子 · 数字'}
+};
+
+var ICONS={
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h5a3 3 0 0 1 3 3v11a2 2 0 0 0-2-2H4z"/><path d="M20 6h-5a3 3 0 0 0-3 3v11a2 2 0 0 1 2-2h6z"/></svg>',
+  calc:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2.5"/><path d="M8 7.5h8M8 12h.01M12 12h.01M16 12h.01M8 15.5h.01M12 15.5h.01M16 15.5h.01"/></svg>',
+  abc:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9 16l3-8 3 8M10 13.5h4"/></svg>',
+  pencil:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l4 4L8 20l-5 1 1-5L17 3z"/><path d="M14 6l4 4"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="#FFC53D" stroke="#F59E0B" stroke-width="1.2"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"/></svg>',
+  grayStar:'<svg viewBox="0 0 24 24" fill="#EFE6D4" stroke="#E2D4BC" stroke-width="1.2"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8L12 2z"/></svg>',
+  hw:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7l4 4L16 4"/><path d="M4 16l4 4 7-7"/><rect x="15" y="13" width="6" height="10" rx="1.5"/></svg>',
+  quiz:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-4.5-3.4L9 21V3z"/><path d="M9.5 10h5M9.5 14h3"/></svg>',
+  pv:'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2.5 4-6 6-6 10a6 6 0 0 0 12 0c0-4-3.5-6-6-10z"/><path d="M9 15.5a3 3 0 0 0 3 3"/></svg>'
+};
+
+/* ---------------- 数据存取 ---------------- */
+function defaultDB(){return {stars:0,records:[]}}
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){
+      var d=JSON.parse(raw);
+      if(d&&typeof d.stars==='number'&&Array.isArray(d.records))return d;
+    }
+  }catch(e){}
+  return defaultDB();
+}
+var db=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}}
+
+/* ---------------- 日期工具 ---------------- */
+function pad(n){return n<10?'0'+n:''+n}
+function dateStr(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+function todayStr(){return dateStr(new Date())}
+var WD=['日','一','二','三','四','五','六'];
+function fmtCN(s){
+  var p=s.split('-');var d=new Date(+p[0],+p[1]-1,+p[2]);
+  return (+p[1])+'月'+(+p[2])+'日 周'+WD[d.getDay()];
+}
+function timeNow(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes())}
+
+/* ---------------- 记录与星星 ---------------- */
+function hwRecordFor(date){
+  var list=db.records.filter(function(r){return r.type==='hw'&&r.date===date});
+  return list.length?list[list.length-1]:null;
+}
+function hwDates(){
+  var s={};
+  db.records.forEach(function(r){if(r.type==='hw'&&r.subjects&&r.subjects.length)s[r.date]=1});
+  return Object.keys(s);
+}
+function streakDays(){
+  var set={};hwDates().forEach(function(d){set[d]=1});
+  var cur=todayStr();
+  if(!set[cur]){
+    var y=new Date();y.setDate(y.getDate()-1);cur=dateStr(y);
+    if(!set[cur])return 0;
+  }
+  var n=0;
+  while(set[cur]){
+    n++;var d=new Date(cur);d.setDate(d.getDate()-1);cur=dateStr(d);
+  }
+  return n;
+}
+function pvDoneToday(subject){
+  return db.records.some(function(r){return r.type==='pv'&&r.date===todayStr()&&r.subject===subject});
+}
+function awardStars(n,type,extra){
+  db.stars+=n;
+  db.records.push(Object.assign({date:todayStr(),time:timeNow(),type:type},extra));
+  save();
+}
+
+/* ---------------- 小工具 ---------------- */
+function $(s){return document.querySelector(s)}
+function shuffle(arr){
+  var a=arr.slice();
+  for(var i=a.length-1;i>0;i--){
+    var j=Math.floor(Math.random()*(i+1));
+    var t=a[i];a[i]=a[j];a[j]=t;
+  }
+  return a;
+}
+function mkQ(q,o){ /* o[0] 为正确答案，运行时打乱选项顺序 */
+  var os=shuffle(o);
+  return {q:q,o:os,a:os.indexOf(o[0])};
+}
+
+/* ---------------- 音效（WebAudio，离线可用） ---------------- */
+var audioOn=true;
+try{audioOn=localStorage.getItem('xxq_sound')!=='0'}catch(e){}
+var actx=null;
+function ensureCtx(){
+  try{
+    if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();
+  }catch(e){}
+  return actx;
+}
+function tone(freq,start,dur,type,vol){
+  if(!audioOn)return;
+  var ctx=ensureCtx();if(!ctx)return;
+  try{
+    var o=ctx.createOscillator(),g=ctx.createGain();
+    o.type=type||'sine';o.frequency.value=freq;
+    var t0=ctx.currentTime+start;
+    g.gain.setValueAtTime(0.0001,t0);
+    g.gain.exponentialRampToValueAtTime(vol||0.16,t0+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+    o.connect(g);g.connect(ctx.destination);
+    o.start(t0);o.stop(t0+dur+0.05);
+  }catch(e){}
+}
+function sTap(){tone(880,0,0.06,'sine',0.07)}
+function sCorrect(){tone(523,0,0.15,'triangle');tone(659,0.12,0.15,'triangle');tone(784,0.24,0.22,'triangle')}
+function sWrong(){tone(330,0,0.18,'sine',0.13);tone(262,0.16,0.26,'sine',0.13)}
+function sStar(){tone(523,0,0.14,'triangle');tone(659,0.12,0.14,'triangle');tone(784,0.24,0.14,'triangle');tone(1047,0.36,0.3,'triangle')}
+
+/* ---------------- 弹层：提示 / 星星 / 彩带 ---------------- */
+var toastTimer=null;
+function toast(msg){
+  var t=$('#toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show')},1700);
+}
+function confetti(n){
+  n=n||26;
+  var colors=['#FFC53D','#FF8F3C','#FF7BA9','#5B9DF0','#55C47A','#A78BFA','#3EC6B8'];
+  for(var i=0;i<n;i++){
+    var p=document.createElement('div');
+    p.className='confetti';
+    p.style.width=(6+Math.random()*8)+'px';
+    p.style.height=(10+Math.random()*10)+'px';
+    p.style.left=(Math.random()*100)+'vw';
+    p.style.background=colors[i%colors.length];
+    p.style.borderRadius=Math.random()>0.5?'50%':'3px';
+    var dur=1.4+Math.random()*1.4;
+    p.style.animationDuration=dur+'s';
+    p.style.animationDelay=(Math.random()*0.4)+'s';
+    document.body.appendChild(p);
+    (function(el,dd){setTimeout(function(){el.remove()},(dd+0.6)*1000)})(p,dur);
+  }
+}
+function starPop(n,msg,sub){
+  var sp=$('#star-pop');
+  sp.innerHTML='<div class="star-pop-box">'
+    +'<svg class="sp-star" viewBox="0 0 120 120"><path d="M60 10 L72.6 47.2 L112 48.1 L80.9 72.7 L92.2 111.4 L60 90.3 L27.8 111.4 L39.1 72.7 L8 48.1 L47.4 47.2 Z" fill="#FFC53D" stroke="#F59E0B" stroke-width="4" stroke-linejoin="round"/><circle cx="52" cy="55" r="4" fill="#4A3B2A"/><circle cx="68" cy="55" r="4" fill="#4A3B2A"/><path d="M52 67 Q60 75 68 67" stroke="#4A3B2A" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>'
+    +'<div class="sp-num">+'+n+' 颗星星</div>'
+    +'<div class="sp-msg">'+msg+'</div>'
+    +'<div class="sp-sub">'+(sub||'已保存好啦，关掉也不会丢哦')+'</div>'
+    +'<button class="big-btn orange smaller" id="spClose">好耶！</button></div>';
+  sp.classList.add('show');
+  $('#spClose').onclick=function(){sp.classList.remove('show')};
+  sStar();confetti();
+}
+</script>
+<script>
+'use strict';
+/* ================= 题库：语文（人教版三年级上册） ================= */
+var CN_BANK=[
+  {q:'《山行》的作者是？',o:['杜牧','李白','杜甫','白居易']},
+  {q:'“停车坐爱枫林晚”的上一句是？',o:['白云生处有人家','远上寒山石径斜','霜叶红于二月花','夕阳无限好']},
+  {q:'《赠刘景文》的作者是？',o:['苏轼','叶绍翁','王维','杜牧']},
+  {q:'“知有儿童挑促织”的下一句是？',o:['夜深篱落一灯明','江上秋风动客情','萧萧梧叶送寒声','轻舟已过万重山']},
+  {q:'《夜书所见》的作者是？',o:['叶绍翁','苏轼','王维','袁枚']},
+  {q:'“两岸猿声啼不住”的下一句是？',o:['轻舟已过万重山','朝辞白帝彩云间','千里江陵一日还','唯见长江天际流']},
+  {q:'《饮湖上初晴后雨》描写的湖是？',o:['西湖','洞庭湖','太湖','鄱阳湖']},
+  {q:'《望洞庭》的作者是？',o:['刘禹锡','李白','王昌龄','杜牧']},
+  {q:'“湖光秋月两相和”的下一句是？',o:['潭面无风镜未磨','白银盘里一青螺','遥望洞庭山水翠','疑是银河落九天']},
+  {q:'与“美丽”意思相近的词语是？',o:['漂亮','丑陋','高大','干净']},
+  {q:'与“开心”意思相反的词语是？',o:['难过','高兴','快乐','兴奋']},
+  {q:'“绿油油”是（　）式词语？',o:['ABB','AABB','ABAB','ABAC']},
+  {q:'下面哪个词语描写秋天的景色？',o:['秋高气爽','春暖花开','烈日炎炎','冰天雪地']},
+  {q:'下面哪个词语书写完全正确？',o:['观察','观查','关察','观茶']},
+  {q:'“荷叶像一个个碧绿的大圆盘。”用了什么修辞手法？',o:['比喻','拟人','夸张','反问']},
+  {q:'“太阳公公露出了笑脸。”用了什么修辞手法？',o:['拟人','比喻','排比','设问']},
+  {q:'《司马光》告诉我们，司马光是一个（　）的孩子？',o:['沉着冷静、机智勇敢','胆小怕事','骄傲自满','粗心大意']},
+  {q:'“群儿戏于庭”中的“戏”意思是？',o:['游戏、玩耍','看戏','戏剧','戏曲']},
+  {q:'“假”字在“放假”中读？',o:['jià','jiǎ','jiā','jiě']},
+  {q:'“发”字在“头发”中读？',o:['fà','fā','fǎ','fá']},
+  {q:'“弯弯的月儿像小船。”这句话把月儿比作？',o:['小船','镰刀','香蕉','月牙']},
+  {q:'“安静”的反义词是？',o:['热闹','宁静','平静','安定']},
+  {q:'下面哪个词语形容非常安静？',o:['鸦雀无声','人声鼎沸','锣鼓喧天','震耳欲聋']},
+  {q:'《早发白帝城》的作者是？',o:['李白','杜甫','王维','白居易']}
+];
+
+/* ================= 题库：英语（PEP 三年级上册） ================= */
+var EN_BANK=[
+  {q:'“苹果”的英文是？',o:['apple','orange','banana','pear']},
+  {q:'“牛奶”的英文是？',o:['milk','juice','water','tea']},
+  {q:'“猴子”的英文是？',o:['monkey','tiger','panda','cat']},
+  {q:'“红色”的英文是？',o:['red','yellow','green','blue']},
+  {q:'“尺子”的英文是？',o:['ruler','pen','book','bag']},
+  {q:'“老虎”的英文是？',o:['tiger','lion','bear','wolf']},
+  {q:'“蛋糕”的英文是？',o:['cake','bread','egg','rice']},
+  {q:'“眼睛”的英文是？',o:['eye','ear','nose','mouth']},
+  {q:'“Goodbye”的意思是？',o:['再见','你好','谢谢','早上好']},
+  {q:'“How are you?”的正确回答是？',o:["I'm fine, thank you.",'I\'m ten.','My name is Mike.','It\'s a pen.']},
+  {q:'“banana”的意思是？',o:['香蕉','苹果','橘子','葡萄']},
+  {q:'“seven”是数字几？',o:['7','6','8','9']},
+  {q:'“I have a duck.”的意思是？',o:['我有一只鸭子','我有一只猫','我有一只狗','我看见鸭子']},
+  {q:'“Thank you!”的正确回应是？',o:["You're welcome.",'Goodbye.','Hello!','OK!']},
+  {q:'用来擦铅笔字的文具是？',o:['eraser','crayon','pencil','ruler']},
+  {q:'“大象”的英文是？',o:['elephant','panda','bear','monkey']},
+  {q:'“orange”还可以表示哪种颜色？',o:['橙色','红色','黄色','绿色']},
+  {q:'“面包”的英文是？',o:['bread','cake','egg','fish']},
+  {q:'“Happy birthday!”的意思是？',o:['生日快乐','新年快乐','圣诞快乐','节日快乐']},
+  {q:'“bird”的意思是？',o:['鸟','鱼','狗','猫']},
+  {q:'“钢笔”的英文是？',o:['pen','pencil','book','bag']},
+  {q:'“— How old are you? — I\'m ____.”',o:['nine','a pen','red','yes']},
+  {q:'“早上好”的英文是？',o:['Good morning','Good night','Goodbye','Thank you']},
+  {q:'“小狗”的英文是？',o:['dog','cat','pig','duck']}
+];
+
+/* ================= 题库：数学概念（人教版三年级上册） ================= */
+var MATH_CONCEPT=[
+  mkQ('1分=（　）秒',['60','10','100','30']),
+  mkQ('1时=（　）分',['60','100','24','10']),
+  mkQ('1分米=（　）厘米',['10','100','1','1000']),
+  mkQ('1千米=（　）米',['1000','100','10','10000']),
+  mkQ('1吨=（　）千克',['1000','100','10','10000']),
+  mkQ('1米-40厘米=（　）厘米',['60','40','96','140']),
+  mkQ('正方形的边长是4厘米，周长是（　）厘米',['16','8','12','20']),
+  mkQ('长方形的长是5厘米、宽是3厘米，周长是（　）厘米',['16','8','15','30']),
+  mkQ('6的3倍是（　）',['18','9','12','3']),
+  mkQ('45是9的（　）倍',['5','4','6','9']),
+  mkQ('把一个西瓜平均分成8份，每份是它的（　）',['1/8','1/4','1/2','8/1']),
+  mkQ('2/5和3/5比较，谁更大？',['3/5','2/5','一样大','无法比较']),
+  mkQ('0和任何数相乘都得（　）',['0','原来的数','1','10']),
+  mkQ('计量卡车载重，通常用（　）作单位',['吨','克','千克','斤']),
+  mkQ('240+350=（　）',['590','490','580','690']),
+  mkQ('800-350=（　）',['450','550','350','650'])
+];
+
+/* ---------------- 数学随机出题 ---------------- */
+function distractors(c,offsets){
+  var cand=[],set={};
+  offsets.forEach(function(d){var v=c+d;if(v>=0&&v!==c&&!set[v]){set[v]=1;cand.push(v)}});
+  var v=1;
+  while(cand.length<3){
+    var x=c+v,y=c-v;
+    if(x!==c&&!set[x]&&x>=0){set[x]=1;cand.push(x)}
+    if(cand.length<3&&y!==c&&!set[y]&&y>=0){set[y]=1;cand.push(y)}
+    v++;
+  }
+  var o=shuffle(cand).slice(0,3);o.push(c);o=shuffle(o);
+  return {o:o,a:o.indexOf(c)};
+}
+function genAddQ(){var a=100+Math.floor(Math.random()*400),b=100+Math.floor(Math.random()*(900-a)),c=a+b,d=distractors(c,[-10,-2,-1,1,2,10,100]);return {q:a+' + '+b+' = ?',o:d.o,a:d.a}}
+function genSubQ(){var a=300+Math.floor(Math.random()*600),b=100+Math.floor(Math.random()*(a-200)),c=a-b,d=distractors(c,[-10,-2,-1,1,2,10,100]);return {q:a+' - '+b+' = ?',o:d.o,a:d.a}}
+function genMulQ(){var a=12+Math.floor(Math.random()*88),b=2+Math.floor(Math.random()*8),c=a*b,d=distractors(c,[-10,-2,-1,1,2,10,100]);return {q:a+' × '+b+' = ?',o:d.o,a:d.a}}
+function genTimesQ(){var x=3+Math.floor(Math.random()*7),y=2+Math.floor(Math.random()*8),c=x*y,d=distractors(c,[-3,-2,-1,1,2,3,10]);return {q:x+' 的 '+y+' 倍是？',o:d.o,a:d.a}}
+function genDivQ(){var x=3+Math.floor(Math.random()*7),k=2+Math.floor(Math.random()*8),y=x*k,d=distractors(k,[-2,-1,1,2,3]);return {q:y+' 是 '+x+' 的几倍？',o:d.o,a:d.a}}
+function mathQuiz(){
+  var concept=shuffle(MATH_CONCEPT),seen={},qs=[],i=0;
+  while(i<concept.length&&qs.length<5){var c=concept[i];if(!seen[c.q]){seen[c.q]=1;qs.push(c)}i++}
+  var gens=[genAddQ,genSubQ,genMulQ,genTimesQ,genDivQ],guard=0;
+  while(qs.length<10&&guard<300){guard++;var g=gens[Math.floor(Math.random()*gens.length)],qq=g();if(!seen[qq.q]){seen[qq.q]=1;qs.push(qq)}}
+  return shuffle(qs);
+}
+function pickQuestions(subject){
+  if(subject==='数学')return mathQuiz();
+  var bank=subject==='语文'?CN_BANK:EN_BANK;
+  return shuffle(bank).slice(0,10).map(function(b){var os=shuffle(b.o);return {q:b.q,o:os,a:os.indexOf(b.o[0])}});
+}
+
+/* ================= 视图：首页 ================= */
+function greetText(){
+  var h=new Date().getHours();
+  if(h<5)return '夜深了，早点睡哦！';
+  if(h<11)return '上午好呀，小勇士！';
+  if(h<13)return '中午好呀，吃饱了吗？';
+  if(h<18)return '下午好呀，精神满满！';
+  return '晚上好呀，今天也很棒！';
+}
+function encourageMsg(){
+  var st=streakDays();
+  if(st>=30)return '连续打卡 '+st+' 天，你太了不起啦！';
+  if(st>=14)return '已经坚持 '+st+' 天啦，继续加油！';
+  if(st>=7)return '连续打卡一周啦，真棒！';
+  if(db.stars>=100)return '星星攒到 '+db.stars+' 颗，闪亮小明星就是你！';
+  if(db.stars>=50)return '已经有 '+db.stars+' 颗星星啦，超厉害！';
+  var pool=['今天也要加油哦！','爱学习的小朋友最棒！','每天进步一点点！','你是最闪亮的小星星！','努力学习，快乐成长！'];
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+function renderHome(){
+  $('#greetHi').textContent=greetText();
+  $('#greetDate').textContent=fmtCN(todayStr());
+  $('#statStars').textContent=db.stars;
+  $('#statStreak').textContent=streakDays();
+  $('#statToday').textContent=hwRecordFor(todayStr())?'已打卡':'未打卡';
+  $('#encourage').textContent=encourageMsg();
+}
+
+/* ================= 视图：作业打卡 ================= */
+var hwChecked={};
+function initHwState(){
+  var rec=hwRecordFor(todayStr());
+  hwChecked={};
+  if(rec&&rec.subjects)rec.subjects.forEach(function(s){hwChecked[s]=true});
+}
+function renderHw(){
+  $('#hwDate').textContent=fmtCN(todayStr());
+  var el=$('#hwList');el.innerHTML='';
+  HW_SUBJECTS.forEach(function(s){
+    var m=HW_META[s],on=!!hwChecked[s];
+    var ico=s==='语文'?ICONS.book:(s==='数学'?ICONS.calc:(s==='英语'?ICONS.abc:(s==='阅读'?ICONS.book:ICONS.pencil)));
+    var div=document.createElement('div');
+    div.className='hw-item'+(on?' checked':'');
+    div.innerHTML='<span class="hw-ico" style="background:'+m.color+'">'+ico+'</span>'
+      +'<span class="hw-name">'+s+'</span>'
+      +'<span class="hw-st">'+(on?'已完成':'还没做')+'</span>'
+      +'<span class="hw-check">'+(on?'✓':'')+'</span>';
+    div.onclick=function(){sTap();toggleHw(s)};
+    el.appendChild(div);
+  });
+  updateHwTip();
+}
+function toggleHw(s){
+  if(hwChecked[s])delete hwChecked[s];else hwChecked[s]=true;
+  renderHw();
+}
+function updateHwTip(){
+  var rec=hwRecordFor(todayStr()),old={};
+  if(rec&&rec.subjects)rec.subjects.forEach(function(s){old[s]=1});
+  var n=0;Object.keys(hwChecked).forEach(function(s){if(!old[s])n++});
+  var allDone=HW_SUBJECTS.every(function(s){return hwChecked[s]});
+  var bonus=allDone&&(!rec||!rec.bonus)?1:0;
+  var el=$('#hwTip');
+  if(Object.keys(hwChecked).length===0){el.innerHTML='先勾选今天完成的作业吧'}
+  else if(n+bonus===0){el.innerHTML='今天已经打过卡啦，明天再来吧'}
+  else{el.innerHTML='完成打卡可得 <b>'+(n+bonus)+'</b> 颗星星'+(bonus?'（全科完成奖励）':'')}
+}
+function doCheckin(){
+  var date=todayStr(),rec=hwRecordFor(date),old={};
+  if(rec&&rec.subjects)rec.subjects.forEach(function(s){old[s]=1});
+  var n=0;HW_SUBJECTS.forEach(function(s){if(hwChecked[s]&&!old[s])n++});
+  var allDone=HW_SUBJECTS.every(function(s){return hwChecked[s]});
+  var bonus=allDone&&(!rec||!rec.bonus)?1:0;
+  if(n===0&&bonus===0){
+    toast(Object.keys(hwChecked).length===0?'先勾选今天完成的作业吧':'这些作业今天已经打过卡啦');
+    return;
+  }
+  var subjects=HW_SUBJECTS.filter(function(s){return hwChecked[s]});
+  if(rec){
+    rec.subjects=subjects;rec.time=timeNow();if(bonus)rec.bonus=true;
+  }else{
+    db.records.push({type:'hw',date:date,time:timeNow(),subjects:subjects,stars:n,bonus:bonus===1});
+  }
+  db.stars+=(n+bonus);
+  save();
+  starPop(n+bonus,bonus?'全科完成，太棒了！':'打卡完成，真棒！','今天 '+fmtCN(date)+' 已记录');
+  initHwState();renderHw();
+}
+
+/* ================= 视图：复习练习 ================= */
+var quiz=null;
+function showQuizPane(p){
+  $('#quiz-select').hidden=p!=='select';
+  $('#quiz-play').hidden=p!=='play';
+  $('#quiz-result').hidden=p!=='result';
+}
+function renderSubjGrid(id,fn){
+  var el=$(id);el.innerHTML='';
+  Q_SUBJECTS.forEach(function(s){
+    var m=Q_META[s];
+    var ico=s==='语文'?ICONS.book:(s==='数学'?ICONS.calc:ICONS.abc);
+    var b=document.createElement('button');
+    b.className='subj-card '+m.cls;
+    b.innerHTML=ico+'<span><span class="sj-t">'+s+'</span><small>'+m.desc+'</small></span>';
+    b.onclick=function(){sTap();fn(s)};
+    el.appendChild(b);
+  });
+}
+function startQuiz(subject){
+  quiz={subject:subject,questions:pickQuestions(subject),idx:0,score:0,answered:false,picks:[]};
+  showQuizPane('play');
+  renderQuiz();
+}
+function renderQuiz(){
+  var q=quiz.questions[quiz.idx];
+  $('#quizSubjName').textContent=quiz.subject;
+  $('#quizCount').textContent=(quiz.idx+1)+'/10';
+  $('#quizBar').style.width=((quiz.idx+1)/10*100)+'%';
+  $('#qText').textContent=q.q;
+  var opts=$('#qOpts');opts.innerHTML='';
+  var tags=['A','B','C','D'];
+  q.o.forEach(function(t,i){
+    var b=document.createElement('button');
+    b.className='opt';b.dataset.i=i;
+    b.innerHTML='<span class="opt-tag">'+tags[i]+'</span><span>'+t+'</span>';
+    b.onclick=function(){answer(i,b)};
+    opts.appendChild(b);
+  });
+  var fb=$('#qFeedback');fb.className='q-feedback hidden';
+  $('#qNext').classList.add('hidden');
+}
+function answer(i,btn){
+  if(quiz.answered)return;
+  quiz.answered=true;
+  var q=quiz.questions[quiz.idx],ok=i===q.a,fb=$('#qFeedback');
+  var opts=document.querySelectorAll('#qOpts .opt');
+  opts.forEach(function(b){b.classList.add('disabled');b.onclick=null});
+  if(ok){
+    quiz.score++;
+    btn.classList.add('correct');
+    fb.textContent='答对啦！真棒！';
+    fb.className='q-feedback ok';
+    sCorrect();
+  }else{
+    btn.classList.add('wrong');
+    opts[q.a].classList.add('correct');
+    fb.textContent='正确答案：'+q.o[q.a];
+    fb.className='q-feedback no';
+    sWrong();
+  }
+  quiz.picks.push({q:q.q,picked:q.o[i],correct:q.o[q.a],ok:ok});
+  var next=$('#qNext');
+  next.textContent=(quiz.idx===9)?'看成绩':'下一题';
+  next.classList.remove('hidden');
+}
+function nextQ(){
+  quiz.idx++;quiz.answered=false;
+  if(quiz.idx>=10)endQuiz();else renderQuiz();
+}
+function endQuiz(){
+  db.records.push({type:'quiz',date:todayStr(),time:timeNow(),subject:quiz.subject,score:quiz.score,total:10});
+  save();
+  var filled=Math.round(quiz.score/2),rs='';
+  for(var i=0;i<5;i++)rs+=i<filled?ICONS.star:ICONS.grayStar;
+  $('#resultStars').innerHTML=rs;
+  $('#resultScore').textContent='答对 '+quiz.score+' / 10 题';
+  var msg;
+  if(quiz.score===10)msg='满分！你是小天才！';
+  else if(quiz.score>=8)msg='太棒了！继续保持！';
+  else if(quiz.score>=6)msg='不错哦，再练一练更棒！';
+  else if(quiz.score>=4)msg='继续努力，你能行！';
+  else msg='别灰心，多练习就会进步！';
+  $('#resultMsg').textContent=msg;
+  var al=$('#answerList');al.innerHTML='';
+  quiz.picks.forEach(function(p,i){
+    var div=document.createElement('div');
+    div.className='ans-item';
+    div.innerHTML='<span class="q">'+(i+1)+'. '+p.q+'</span><br>你的答案：<span class="'+(p.ok?'r':'w')+'">'+p.picked+'</span>　正确答案：<span class="r">'+p.correct+'</span>';
+    al.appendChild(div);
+  });
+  showQuizPane('result');
+  window.scrollTo(0,0);
+}
+
+/* ================= 视图：预习新知识 ================= */
+var pvSubject=null;
+var PV={
+  '语文':[
+    {t:'生字与词语',b:'课文里的生字要会<b>读</b>、会<b>写</b>、会<b>组词</b>。注意形近字，比如“坪”和“评”，“捕”和“铺”，看清楚再下笔。'},
+    {t:'多音字',b:'一个字有几个读音要分清楚：<b>假</b>（放假 jià / 真假 jiǎ）、<b>发</b>（发现 fā / 头发 fà）、<b>骨</b>（骨头 gǔ / 花骨朵儿 gū）、<b>曲</b>（歌曲 qǔ / 弯曲 qū）。'},
+    {t:'近义词和反义词',b:'意思相近的词叫近义词，比如“美丽—漂亮”；意思相反的词叫反义词，比如“开心—难过”。多积累，写作文用得上！'},
+    {t:'四字词语',b:'描写秋天的：<b>秋高气爽、天高云淡、五谷丰登、瓜果飘香</b>。还有“AABB式”（开开心心）、“ABB式”（静悄悄）的词语。'},
+    {t:'古诗背诵',b:'本册要会背会默的古诗：《山行》杜牧、《赠刘景文》苏轼、《夜书所见》叶绍翁、《望天门山》李白、《饮湖上初晴后雨》苏轼、《望洞庭》刘禹锡、《早发白帝城》李白。记住作者和名句。'},
+    {t:'修辞手法',b:'把一种东西比作另一种东西，常用“像、好像”，叫<b>比喻</b>（弯弯的月儿像小船）；把物当成人来写，叫<b>拟人</b>（小鸟在枝头唱歌）。'},
+    {t:'文言文《司马光》',b:'“群儿戏于庭，一儿登瓮，足跌没水中。众皆弃去，光持石击瓮破之，水迸，儿得活。”告诉我们遇事要<b>沉着冷静、机智勇敢</b>。'}
+  ],
+  '数学':[
+    {t:'时分秒',b:'1时=<b>60分</b>，1分=<b>60秒</b>。看钟表：时针短，分针长，秒针走得最快。会认整时和几时几分。'},
+    {t:'万以内的加法和减法',b:'笔算加法：<b>相同数位对齐</b>，从个位加起，满十向前一位进1。笔算减法：从个位减起，不够减时从前一位退1当10。算完可以<b>验算</b>。'},
+    {t:'测量（长度单位）',b:'从小到大：毫米＜厘米＜分米＜米＜千米。<b>1厘米=10毫米，1分米=10厘米，1米=10分米=100厘米，1千米=1000米</b>。量铅笔用厘米，量公路用千米。'},
+    {t:'测量（质量单位）',b:'克、千克、吨。<b>1千克=1000克，1吨=1000千克</b>。称硬币用克，称人的体重用千克，称卡车载重用吨。'},
+    {t:'倍的认识',b:'求“一个数是另一个数的几倍”用<b>除法</b>（12是3的4倍）；求“一个数的几倍是多少”用<b>乘法</b>（5的3倍是15）。'},
+    {t:'多位数乘一位数',b:'从<b>个位</b>乘起，用一位数依次乘多位数的每一位，满几十就向前一位进几。<b>0和任何数相乘都得0</b>。'},
+    {t:'长方形和正方形',b:'长方形：对边相等，四个角都是直角。正方形：四条边都相等。<b>长方形周长=（长+宽）×2；正方形周长=边长×4</b>。'},
+    {t:'分数的初步认识',b:'把一个整体<b>平均分成</b>几份，每份就是它的几分之一，比如平均分成4份，每份是1/4。同分母分数比大小：分子大的分数大（3/5＞2/5）。'}
+  ],
+  '英语':[
+    {t:'字母',b:'26个英文字母要会认、会读、会写，注意<b>大小写</b>和笔顺。Aa、Bb、Cc……每天读一遍字母歌。'},
+    {t:'问候语',b:'Hello! / Hi! 你好！Good morning! 早上好！How are you? 你好吗？—— I\'m fine, thank you. 我很好，谢谢！'},
+    {t:'文具单词',b:'pen 钢笔、pencil 铅笔、ruler 尺子、eraser 橡皮、crayon 蜡笔、bag 书包、book 书、pencil box 铅笔盒。'},
+    {t:'颜色单词',b:'red 红色、yellow 黄色、green 绿色、blue 蓝色、black 黑色、brown 棕色、white 白色、orange 橙色。'},
+    {t:'身体部位',b:'face 脸、ear 耳朵、eye 眼睛、nose 鼻子、mouth 嘴、arm 胳膊、hand 手、head 头、body 身体、leg 腿、foot 脚。'},
+    {t:'动物单词',b:'cat 猫、dog 狗、duck 鸭子、pig 猪、monkey 猴子、bird 鸟、bear 熊、panda 熊猫、elephant 大象、tiger 老虎。'},
+    {t:'食物和数字',b:'bread 面包、juice 果汁、egg 鸡蛋、milk 牛奶、cake 蛋糕、rice 米饭、fish 鱼。数字：one~ten 一~十。'},
+    {t:'常用句型',b:'I have a ... 我有一个……　I\'d like some ... 我想要一些……　How many ...? 有多少……？　Happy birthday! 生日快乐！'}
+  ]
+};
+function renderPvSubjGrid(){
+  renderSubjGrid('#pvSubjGrid',function(s){renderPvList(s)});
+}
+function renderPvList(subject){
+  pvSubject=subject;
+  $('#pvSubjName').textContent=subject;
+  var el=$('#pvCards');el.innerHTML='';
+  PV[subject].forEach(function(k,i){
+    var card=document.createElement('div');
+    card.className='kn-card';
+    card.innerHTML='<div class="kn-head"><span class="kn-num">'+(i+1)+'</span><span class="kn-title">'+k.t+'</span><span class="kn-arrow">›</span></div><div class="kn-body">'+k.b+'</div>';
+    card.querySelector('.kn-head').onclick=function(){sTap();card.classList.toggle('open')};
+    el.appendChild(card);
+  });
+  $('#pv-select').hidden=true;
+  $('#pv-list').hidden=false;
+  updatePvTip();
+}
+function updatePvTip(){
+  if(pvDoneToday(pvSubject)){ $('#pvTip').textContent='今天已预习过啦，明天再学新知识吧'; $('#pvDone').style.opacity=.5; }
+  else{ $('#pvTip').textContent='认真学完，点下面按钮得 1 颗星星'; $('#pvDone').style.opacity=1; }
+}
+function finishPreview(){
+  if(pvDoneToday(pvSubject)){toast('今天已经预习过啦，明天再来吧');return}
+  awardStars(1,'pv',{subject:pvSubject});
+  starPop(1,'预习完成！','今天 '+fmtCN(todayStr())+' 预习了'+pvSubject);
+  updatePvTip();renderHome();
+}
+
+/* ================= 视图：历史记录 ================= */
+var curHistTab='all';
+function renderHistTabs(){
+  var tabs=[['all','全部'],['hw','打卡'],['quiz','练习'],['pv','预习']];
+  var el=$('#histTabs');el.innerHTML='';
+  tabs.forEach(function(t){
+    var b=document.createElement('button');
+    b.textContent=t[1];
+    if(t[0]===curHistTab)b.className='active';
+    b.onclick=function(){sTap();curHistTab=t[0];renderHistory()};
+    el.appendChild(b);
+  });
+}
+function renderHistory(){
+  renderHistTabs();
+  $('#histSum').innerHTML='一共攒了 <b>'+db.stars+'</b> 颗星星 · 已连续打卡 <b>'+streakDays()+'</b> 天';
+  var list=db.records.slice().reverse();
+  if(curHistTab!=='all')list=list.filter(function(r){return r.type===curHistTab});
+  var el=$('#histList');el.innerHTML='';
+  if(!list.length){
+    el.innerHTML='<div class="hist-empty">'+ICONS.star+'<p>还没有记录哦，快去玩一玩吧！</p></div>';
+    return;
+  }
+  list.forEach(function(r){
+    var ico,title,badge,color;
+    if(r.type==='hw'){
+      ico=ICONS.hw;color='#55C47A';
+      title='作业打卡：'+r.subjects.join('、');
+      badge='+'+(r.stars+(r.bonus?1:0))+' 星星';
+    }else if(r.type==='quiz'){
+      ico=ICONS.quiz;color='#5B9DF0';
+      title=r.subject+'练习';
+      badge=r.score+' / 10';
+    }else{
+      ico=ICONS.pv;color='#FF8F3C';
+      title='预习：'+r.subject;
+      badge='+1 星星';
+    }
+    var div=document.createElement('div');
+    div.className='hist-item';
+    div.innerHTML='<span class="hist-ico" style="background:'+color+'">'+ico+'</span>'
+      +'<span class="hist-main"><span class="hist-title">'+title+'</span><span class="hist-date">'+fmtCN(r.date)+' '+r.time+'</span></span>'
+      +'<span class="hist-badge">'+badge+'</span>';
+    el.appendChild(div);
+  });
+}
+
+/* ================= 视图切换与事件 ================= */
+function showView(name){
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+  $('#v-'+name).classList.add('active');
+  document.querySelectorAll('#tabbar .tab').forEach(function(t){t.classList.toggle('active',t.dataset.goto===name)});
+  window.scrollTo(0,0);
+  if(name==='home')renderHome();
+  else if(name==='hw'){initHwState();renderHw();}
+  else if(name==='quiz'){quiz=null;showQuizPane('select');renderSubjGrid('#quizSubjGrid',startQuiz);}
+  else if(name==='pv'){pvSubject=null;$('#pv-select').hidden=false;$('#pv-list').hidden=true;renderPvSubjGrid();}
+  else if(name==='history')renderHistory();
+}
+function toggleSound(){
+  audioOn=!audioOn;
+  try{localStorage.setItem('xxq_sound',audioOn?'1':'0')}catch(e){}
+  $('#soundIcon').innerHTML=audioOn
+    ?'<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>'
+    :'<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/>';
+  if(audioOn)sTap();
+}
+document.addEventListener('click',function(e){
+  var g=e.target.closest('[data-goto]');
+  if(g){sTap();var t=g.dataset.goto;showView(t);return}
+  if(e.target.closest('#hwDone')){doCheckin();return}
+  if(e.target.closest('#qNext')){sTap();nextQ();return}
+  if(e.target.closest('#quizQuit')){sTap();quiz=null;showQuizPane('select');return}
+  if(e.target.closest('#quizAgain')){sTap();startQuiz(quiz.subject);return}
+  if(e.target.closest('#quizOther')){sTap();quiz=null;showQuizPane('select');renderSubjGrid('#quizSubjGrid',startQuiz);return}
+  if(e.target.closest('#quizHome')){sTap();quiz=null;showView('home');return}
+  if(e.target.closest('#pvBack')){sTap();pvSubject=null;$('#pv-select').hidden=false;$('#pv-list').hidden=true;renderPvSubjGrid();return}
+  if(e.target.closest('#pvDone')){finishPreview();return}
+  if(e.target.closest('#soundBtn')){toggleSound();return}
+});
+
+/* ================= 启动 ================= */
+(function init(){
+  if(!audioOn){
+    $('#soundIcon').innerHTML='<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/>';
+  }
+  renderHistTabs();
+  showView('home');
+})();
+</script>
+
+
+</body>
+</html>
